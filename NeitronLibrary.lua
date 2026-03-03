@@ -211,7 +211,7 @@ function Library:CreateWindow(options)
     local subtitle = options.Subtitle or "Transparent custom library"
     local size = options.Size or UDim2.fromOffset(720, 470)
     local sidebarWidth = options.SidebarWidth or 180
-    local toggleKey = options.ToggleKey or Enum.KeyCode.RightShift
+    local toggleKey = options.ToggleKey or Enum.KeyCode.K
 
     local parent = guiParent()
     local old = parent and parent:FindFirstChild("RoinUI_Main")
@@ -347,6 +347,7 @@ function Library:CreateWindow(options)
         BackgroundColor3 = self.Theme.White,
         BackgroundTransparency = 0.96,
         BorderSizePixel = 0,
+        ClipsDescendants = true,
         Position = UDim2.new(0, sidebarWidth + 14, 0, 0),
         Size = UDim2.new(1, -(sidebarWidth + 14), 1, 0),
         Parent = body,
@@ -521,10 +522,10 @@ function WindowMethods:Tab(options)
 
     local page = create("ScrollingFrame", {
         Active = true,
-        AutomaticCanvasSize = Enum.AutomaticSize.Y,
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         CanvasSize = UDim2.new(),
+        ClipsDescendants = true,
         ScrollBarImageTransparency = 1,
         ScrollBarThickness = 0,
         Size = UDim2.new(1, 0, 1, 0),
@@ -533,11 +534,23 @@ function WindowMethods:Tab(options)
     })
     padding(page, 14, 14, 14, 14)
 
-    create("UIListLayout", {
-        Padding = UDim.new(0, 10),
-        SortOrder = Enum.SortOrder.LayoutOrder,
+    local holder = create("Frame", {
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
         Parent = page,
     })
+
+    local list = create("UIListLayout", {
+        Padding = UDim.new(0, 10),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Parent = holder,
+    })
+
+    list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        holder.Size = UDim2.new(1, 0, 0, list.AbsoluteContentSize.Y)
+        page.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y + 28)
+    end)
 
     local tab = setmetatable({
         Window = self,
@@ -548,6 +561,8 @@ function WindowMethods:Tab(options)
         IconLabel = iconLabel,
         TitleLabel = titleLabel,
         Page = page,
+        Holder = holder,
+        Layout = list,
     }, {
         __index = TabMethods,
     })
@@ -625,7 +640,7 @@ local function createCard(tab, options, height)
         BackgroundTransparency = 0.08,
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, height),
-        Parent = tab.Page,
+        Parent = tab.Holder,
     })
     round(card, 20)
     local cardStroke = stroke(card, tab.Window.Library.Theme.White, 0.92, 1)
