@@ -2,6 +2,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
+local Lighting = game:GetService("Lighting")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -212,6 +213,7 @@ function Library:CreateWindow(options)
     local size = options.Size or UDim2.fromOffset(720, 470)
     local sidebarWidth = options.SidebarWidth or 180
     local toggleKey = options.ToggleKey or Enum.KeyCode.K
+    local blurSize = options.BlurSize or 18
 
     local parent = guiParent()
     local old = parent and parent:FindFirstChild("RoinUI_Main")
@@ -355,6 +357,18 @@ function Library:CreateWindow(options)
     round(content, 24)
     local contentStroke = stroke(content, self.Theme.White, 0.93, 1)
 
+    local blur = Lighting:FindFirstChild("RoinUI_Blur")
+    if not blur then
+        blur = create("BlurEffect", {
+            Name = "RoinUI_Blur",
+            Size = 0,
+            Enabled = true,
+            Parent = Lighting,
+        })
+    else
+        blur.Enabled = true
+    end
+
     local window = setmetatable({
         Library = self,
         ScreenGui = screenGui,
@@ -366,6 +380,8 @@ function Library:CreateWindow(options)
         ToggleKey = toggleKey,
         Visible = true,
         KeyChip = keyChip,
+        Blur = blur,
+        BlurSize = blurSize,
         _keyConnection = nil,
     }, {
         __index = WindowMethods,
@@ -423,6 +439,7 @@ function Library:CreateWindow(options)
     tween(sidebarStroke, 0.24, { Transparency = 0.92 })
     tween(contentStroke, 0.24, { Transparency = 0.93 })
     tween(keyStroke, 0.24, { Transparency = 0.9 })
+    tween(blur, 0.24, { Size = blurSize })
 
     window:SetToggleKey(toggleKey)
     return window
@@ -449,9 +466,21 @@ function WindowMethods:SetToggleKey(keyCode)
 
         if self.Visible then
             self.Root.Visible = true
+            if self.Blur then
+                self.Blur.Enabled = true
+                tween(self.Blur, 0.18, { Size = self.BlurSize })
+            end
             self.Root.Position = UDim2.new(self.Root.Position.X.Scale, self.Root.Position.X.Offset, self.Root.Position.Y.Scale, self.Root.Position.Y.Offset + 8)
             tween(self.Root, 0.18, { Position = UDim2.new(self.Root.Position.X.Scale, self.Root.Position.X.Offset, self.Root.Position.Y.Scale, self.Root.Position.Y.Offset - 8) })
         else
+            if self.Blur then
+                local blurHide = tween(self.Blur, 0.14, { Size = 0 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+                blurHide.Completed:Connect(function()
+                    if self.Blur and not self.Visible then
+                        self.Blur.Enabled = false
+                    end
+                end)
+            end
             local hide = tween(self.Root, 0.14, { BackgroundTransparency = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
             hide.Completed:Connect(function()
                 if not self.Visible then
