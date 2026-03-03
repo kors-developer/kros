@@ -80,6 +80,8 @@ local Library = {
 
 local WindowMethods = {}
 local TabMethods = {}
+local ModulePanelMethods = {}
+local ModuleMethods = {}
 
 function Library:_getNotifyHolder()
     if self._notifyHolder and self._notifyHolder.Parent then
@@ -949,5 +951,379 @@ function TabMethods:Slider(options)
     }
 end
 
+function TabMethods:ModulePanel(options)
+    options = options or {}
+
+    local panel = create("Frame", {
+        BackgroundColor3 = self.Window.Library.Theme.CardDark,
+        BackgroundTransparency = 0.14,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, options.Height or 340),
+        Parent = self.Holder,
+    })
+    round(panel, 24)
+    stroke(panel, self.Window.Library.Theme.White, 0.92, 1)
+
+    create("UIGradient", {
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(16, 24, 38)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 12, 20)),
+        }),
+        Rotation = 20,
+        Parent = panel,
+    })
+
+    local shine = create("Frame", {
+        BackgroundColor3 = self.Window.Library.Theme.White,
+        BackgroundTransparency = 0.97,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 1, 0, 1),
+        Size = UDim2.new(1, -2, 0, 22),
+        Parent = panel,
+    })
+    round(shine, 24)
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 16, 0, 14),
+        Size = UDim2.new(1, -32, 0, 18),
+        Font = Enum.Font.GothamSemibold,
+        Text = options.Title or "Modules",
+        TextColor3 = self.Window.Library.Theme.Text,
+        TextSize = 15,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = panel,
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 16, 0, 34),
+        Size = UDim2.new(1, -32, 0, 16),
+        Font = Enum.Font.Gotham,
+        Text = options.Desc or "Left click toggles module. Right click opens settings.",
+        TextColor3 = self.Window.Library.Theme.Muted,
+        TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = panel,
+    })
+
+    local stack = create("Frame", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 12, 0, 62),
+        Size = UDim2.new(1, -24, 1, -74),
+        Parent = panel,
+    })
+
+    create("UIListLayout", {
+        Padding = UDim.new(0, 10),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Parent = stack,
+    })
+
+    return setmetatable({
+        Tab = self,
+        Panel = panel,
+        Stack = stack,
+    }, {
+        __index = ModulePanelMethods,
+    })
+end
+
+function ModulePanelMethods:AddModule(options)
+    options = options or {}
+
+    local enabled = options.Enabled == true
+    local expanded = false
+    local settingsHeight = options.SettingsHeight or 88
+
+    local card = create("Frame", {
+        BackgroundColor3 = self.Tab.Window.Library.Theme.Card,
+        BackgroundTransparency = 0.12,
+        BorderSizePixel = 0,
+        ClipsDescendants = true,
+        Size = UDim2.new(1, 0, 0, 62),
+        Parent = self.Stack,
+    })
+    round(card, 20)
+    local cardStroke = stroke(card, self.Tab.Window.Library.Theme.White, 0.93, 1)
+
+    local leftBar = create("Frame", {
+        BackgroundColor3 = self.Tab.Window.Library.Theme.Accent,
+        BackgroundTransparency = enabled and 0.08 or 1,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 10),
+        Size = UDim2.new(0, 3, 1, -20),
+        Parent = card,
+    })
+    round(leftBar, 999)
+
+    local hitbox = create("TextButton", {
+        AutoButtonColor = false,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 62),
+        Text = "",
+        Parent = card,
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 16, 0, 12),
+        Size = UDim2.new(1, -120, 0, 18),
+        Font = Enum.Font.GothamSemibold,
+        Text = options.Title or "Module",
+        TextColor3 = self.Tab.Window.Library.Theme.Text,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = card,
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 16, 0, 32),
+        Size = UDim2.new(1, -130, 0, 16),
+        Font = Enum.Font.Gotham,
+        Text = options.Desc or "Left click toggles. Right click opens settings.",
+        TextColor3 = self.Tab.Window.Library.Theme.Muted,
+        TextSize = 11,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = card,
+    })
+
+    local statePill = create("TextLabel", {
+        AnchorPoint = Vector2.new(1, 0.5),
+        BackgroundColor3 = enabled and self.Tab.Window.Library.Theme.AccentDark or Color3.fromRGB(56, 64, 80),
+        BackgroundTransparency = 0.18,
+        Position = UDim2.new(1, -14, 0, 22),
+        Size = UDim2.fromOffset(64, 24),
+        Font = Enum.Font.GothamSemibold,
+        Text = enabled and "ON" or "OFF",
+        TextColor3 = self.Tab.Window.Library.Theme.White,
+        TextSize = 11,
+        Parent = card,
+    })
+    round(statePill, 999)
+
+    local settings = create("Frame", {
+        BackgroundTransparency = 1,
+        ClipsDescendants = true,
+        Position = UDim2.new(0, 16, 0, 62),
+        Size = UDim2.new(1, -32, 0, 0),
+        Parent = card,
+    })
+
+    local module = setmetatable({
+        Panel = self,
+        Card = card,
+        Settings = settings,
+        StatePill = statePill,
+        LeftBar = leftBar,
+        CardStroke = cardStroke,
+        Enabled = enabled,
+        Expanded = expanded,
+        SettingsHeight = settingsHeight,
+        OnToggle = options.OnToggle,
+    }, {
+        __index = ModuleMethods,
+    })
+
+    hitbox.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            module:SetEnabled(not module.Enabled)
+        elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+            module:SetExpanded(not module.Expanded)
+        end
+    end)
+
+    if options.BuildSettings then
+        options.BuildSettings(module)
+    end
+
+    module:SetEnabled(enabled, true)
+    return module
+end
+
+function ModuleMethods:SetEnabled(enabled, skipCallback)
+    self.Enabled = enabled
+    tween(self.StatePill, 0.16, {
+        BackgroundColor3 = enabled and self.Panel.Tab.Window.Library.Theme.AccentDark or Color3.fromRGB(56, 64, 80),
+    })
+    self.StatePill.Text = enabled and "ON" or "OFF"
+    tween(self.LeftBar, 0.16, {
+        BackgroundTransparency = enabled and 0.08 or 1,
+    })
+    tween(self.CardStroke, 0.16, {
+        Color = enabled and self.Panel.Tab.Window.Library.Theme.Accent or self.Panel.Tab.Window.Library.Theme.White,
+        Transparency = enabled and 0.85 or 0.93,
+    })
+
+    if not skipCallback and self.OnToggle then
+        self.OnToggle(enabled, self)
+    end
+end
+
+function ModuleMethods:SetExpanded(expanded)
+    self.Expanded = expanded
+    tween(self.Settings, 0.18, {
+        Size = UDim2.new(1, -32, 0, expanded and self.SettingsHeight or 0),
+    })
+    tween(self.Card, 0.18, {
+        Size = UDim2.new(1, 0, 0, expanded and (72 + self.SettingsHeight) or 62),
+    })
+end
+
+function ModuleMethods:AddLabel(options)
+    options = options or {}
+
+    return create("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = options.Position or UDim2.new(0, 0, 0, 10),
+        Size = options.Size or UDim2.new(1, 0, 0, 20),
+        Font = options.Font or Enum.Font.Gotham,
+        Text = options.Text or "",
+        TextColor3 = options.TextColor3 or self.Panel.Tab.Window.Library.Theme.Muted,
+        TextSize = options.TextSize or 11,
+        TextWrapped = options.TextWrapped ~= false,
+        TextXAlignment = options.TextXAlignment or Enum.TextXAlignment.Left,
+        TextYAlignment = options.TextYAlignment or Enum.TextYAlignment.Top,
+        Parent = self.Settings,
+    })
+end
+
+function ModuleMethods:AddButton(options)
+    options = options or {}
+
+    local button = create("TextButton", {
+        AutoButtonColor = false,
+        BackgroundColor3 = options.Color or self.Panel.Tab.Window.Library.Theme.AccentDark,
+        BorderSizePixel = 0,
+        Position = options.Position or UDim2.new(0, 0, 0, 10),
+        Size = options.Size or UDim2.new(0, 132, 0, 34),
+        Font = Enum.Font.GothamSemibold,
+        Text = options.Text or "Run",
+        TextColor3 = self.Panel.Tab.Window.Library.Theme.White,
+        TextSize = 12,
+        Parent = self.Settings,
+    })
+    round(button, 14)
+    stroke(button, self.Panel.Tab.Window.Library.Theme.White, 0.88, 1)
+
+    button.MouseButton1Click:Connect(function()
+        if options.Callback then
+            options.Callback(self)
+        end
+    end)
+
+    return button
+end
+
+function ModuleMethods:AddSlider(options)
+    options = options or {}
+
+    local value = options.Default or options.Min or 0
+    local minValue = options.Min or 0
+    local maxValue = options.Max or 100
+    local step = options.Step or 1
+    local dragging = false
+
+    local root = create("Frame", {
+        BackgroundTransparency = 1,
+        Position = options.Position or UDim2.new(0, 0, 0, 10),
+        Size = options.Size or UDim2.new(1, 0, 0, 36),
+        Parent = self.Settings,
+    })
+
+    local valueLabel = create("TextLabel", {
+        AnchorPoint = Vector2.new(1, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(1, 0, 0, 0),
+        Size = UDim2.fromOffset(64, 16),
+        Font = Enum.Font.GothamSemibold,
+        Text = tostring(value),
+        TextColor3 = self.Panel.Tab.Window.Library.Theme.Accent,
+        TextSize = 13,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        Parent = root,
+    })
+
+    local track = create("Frame", {
+        BackgroundColor3 = Color3.fromRGB(68, 76, 94),
+        BackgroundTransparency = 0.22,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 26),
+        Size = UDim2.new(1, 0, 0, 8),
+        Parent = root,
+    })
+    round(track, 999)
+
+    local fill = create("Frame", {
+        BackgroundColor3 = self.Panel.Tab.Window.Library.Theme.Accent,
+        BorderSizePixel = 0,
+        Size = UDim2.new(0, 0, 1, 0),
+        Parent = track,
+    })
+    round(fill, 999)
+
+    local knob = create("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundColor3 = self.Panel.Tab.Window.Library.Theme.White,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0.5, 0),
+        Size = UDim2.fromOffset(16, 16),
+        Parent = track,
+    })
+    round(knob, 999)
+
+    local slider = {}
+
+    local function setValue(rawValue)
+        local snapped = math.floor(((rawValue - minValue) / step) + 0.5) * step + minValue
+        value = clamp(snapped, minValue, maxValue)
+        local alpha = (value - minValue) / math.max(maxValue - minValue, 1)
+        tween(fill, 0.08, { Size = UDim2.new(alpha, 0, 1, 0) })
+        tween(knob, 0.08, { Position = UDim2.new(alpha, 0, 0.5, 0) })
+        valueLabel.Text = tostring(value)
+
+        if options.Callback then
+            options.Callback(value, self)
+        end
+    end
+
+    local function updateFromInput(input)
+        local alpha = clamp((input.Position.X - track.AbsolutePosition.X) / math.max(track.AbsoluteSize.X, 1), 0, 1)
+        setValue(minValue + ((maxValue - minValue) * alpha))
+    end
+
+    track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            updateFromInput(input)
+        end
+    end)
+
+    track.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            updateFromInput(input)
+        end
+    end)
+
+    setValue(value)
+
+    function slider:Get()
+        return value
+    end
+
+    function slider:Set(nextValue)
+        setValue(nextValue)
+    end
+
+    slider.Root = root
+    return slider
+end
+
 return Library
-с
