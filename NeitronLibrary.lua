@@ -950,3 +950,4 @@ function TabMethods:Slider(options)
 end
 
 return Library
+с
