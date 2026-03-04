@@ -62,18 +62,18 @@ end
 
 local Library = {
     Theme = {
-        Background = Color3.fromRGB(8, 11, 18),
-        Panel = Color3.fromRGB(16, 21, 32),
-        PanelSoft = Color3.fromRGB(22, 29, 44),
-        PanelRaised = Color3.fromRGB(27, 35, 52),
-        Accent = Color3.fromRGB(0, 170, 255),
-        AccentSoft = Color3.fromRGB(24, 83, 133),
-        AccentDark = Color3.fromRGB(0, 117, 188),
-        Text = Color3.fromRGB(243, 247, 255),
-        Muted = Color3.fromRGB(153, 165, 186),
-        Outline = Color3.fromRGB(255, 255, 255),
+        Background = Color3.fromRGB(4, 4, 6),
+        Panel = Color3.fromRGB(6, 6, 8),
+        PanelSoft = Color3.fromRGB(10, 10, 13),
+        PanelRaised = Color3.fromRGB(12, 12, 16),
+        Accent = Color3.fromRGB(0, 119, 255),
+        AccentSoft = Color3.fromRGB(8, 18, 34),
+        AccentDark = Color3.fromRGB(10, 22, 40),
+        Text = Color3.fromRGB(240, 242, 247),
+        Muted = Color3.fromRGB(121, 126, 136),
+        Outline = Color3.fromRGB(24, 27, 33),
         Success = Color3.fromRGB(57, 214, 147),
-        Dim = Color3.fromRGB(87, 96, 113),
+        Dim = Color3.fromRGB(40, 44, 52),
     },
 }
 
@@ -140,7 +140,7 @@ local function createSectionCard(tab, side, text)
     create("Frame", {
         AnchorPoint = Vector2.new(1, 0.5),
         BackgroundColor3 = tab.Window.Library.Theme.Accent,
-        BackgroundTransparency = 0.2,
+        BackgroundTransparency = 0.05,
         BorderSizePixel = 0,
         Position = UDim2.new(1, 0, 0.5, 0),
         Size = UDim2.new(0.28, 0, 0, 2),
@@ -164,13 +164,13 @@ local function createCard(tab, options, height, side)
 
     local card = create("Frame", {
         BackgroundColor3 = theme.PanelRaised,
-        BackgroundTransparency = 0.16,
+        BackgroundTransparency = 0.04,
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, height),
         Parent = holder,
     })
-    round(card, 20)
-    local cardStroke = stroke(card, theme.Outline, 0.92, 1)
+    round(card, 8)
+    local cardStroke = stroke(card, theme.Outline, 0.18, 1)
 
     create("UIGradient", {
         Color = ColorSequence.new({
@@ -183,13 +183,13 @@ local function createCard(tab, options, height, side)
 
     local shine = create("Frame", {
         BackgroundColor3 = theme.Outline,
-        BackgroundTransparency = 0.985,
+        BackgroundTransparency = 1,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 1, 0, 1),
         Size = UDim2.new(1, -2, 0, 24),
         Parent = card,
     })
-    round(shine, 20)
+    round(shine, 8)
 
     local titleLabel = create("TextLabel", {
         BackgroundTransparency = 1,
@@ -248,19 +248,23 @@ function Library:CreateWindow(options)
 
     local theme = self.Theme
     local title = options.Title or options.Name or "Neitron UI"
-    local subtitle = options.Subtitle or "Three panel library"
+    local subtitle = options.Subtitle or "Module hub"
     local toggleKey = options.ToggleKey or Enum.KeyCode.K
-    local size = options.Size or UDim2.fromScale(0.9, 0.82)
-    local minSize = options.MinSize or Vector2.new(920, 560)
-    local maxSize = options.MaxSize or Vector2.new(1500, 900)
-    local leftWidth = options.LeftWidth or 0.19
-    local rightWidth = options.RightWidth or 0.21
-    local gap = options.Gap or 16
-    local footerHeight = options.FooterHeight or 68
-    local overlayTransparency = options.OverlayTransparency or 0.45
-    local leftPanelTransparency = options.LeftPanelTransparency or 0.18
-    local centerPanelTransparency = options.CenterPanelTransparency or 0.12
-    local rightPanelTransparency = options.RightPanelTransparency or 0.18
+    local size = options.Size or UDim2.fromScale(1, 1)
+    local minSize = options.MinSize or Vector2.new(1280, 720)
+    local maxSize = options.MaxSize or Vector2.new(3840, 2160)
+    local leftPanelWidth = options.LeftPanelWidth or ((type(options.LeftWidth) == "number" and options.LeftWidth > 1) and options.LeftWidth or 272)
+    local rightPanelWidth = options.RightPanelWidth or ((type(options.RightWidth) == "number" and options.RightWidth > 1) and options.RightWidth or 360)
+    local gap = options.Gap or 22
+    local sideMargin = options.SideMargin or 150
+    local bodyTop = options.BodyTop or 210
+    local bottomInset = options.BottomInset or 96
+    local showProfileCard = options.ShowProfileCard == true
+    local footerHeight = showProfileCard and (options.FooterHeight or 68) or 0
+    local overlayTransparency = options.OverlayTransparency or 0.82
+    local leftPanelTransparency = options.LeftPanelTransparency or 0.04
+    local centerPanelTransparency = options.CenterPanelTransparency or 0.03
+    local rightPanelTransparency = options.RightPanelTransparency or 0.04
 
     local rightPanelEnabled = options.RightPanelEnabled
     if rightPanelEnabled == nil then
@@ -289,10 +293,19 @@ function Library:CreateWindow(options)
 
     local overlay = create("Frame", {
         BackgroundColor3 = Color3.new(0, 0, 0),
-        BackgroundTransparency = overlayTransparency,
+        BackgroundTransparency = 1,
         BorderSizePixel = 0,
         Size = UDim2.fromScale(1, 1),
         Parent = screenGui,
+    })
+
+    local dimmer = create("Frame", {
+        BackgroundColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = overlayTransparency,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0.55, 0),
+        Size = UDim2.new(1, 0, 0.45, 0),
+        Parent = overlay,
     })
 
     local stage = create("Frame", {
@@ -310,98 +323,241 @@ function Library:CreateWindow(options)
         Parent = stage,
     })
 
+    local toolbar = create("Frame", {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 16, 0, 14),
+        Size = UDim2.fromOffset(214, 44),
+        Parent = stage,
+    })
+
+    create("UIListLayout", {
+        FillDirection = Enum.FillDirection.Horizontal,
+        Padding = UDim.new(0, 8),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        VerticalAlignment = Enum.VerticalAlignment.Center,
+        Parent = toolbar,
+    })
+
+    local toolbarButtons = {}
+    for index = 1, 4 do
+        local toolbarButton = create("Frame", {
+            BackgroundColor3 = theme.PanelSoft,
+            BackgroundTransparency = 0.02,
+            BorderSizePixel = 0,
+            Size = UDim2.fromOffset(index == 2 and 62 or 44, 44),
+            Parent = toolbar,
+        })
+        round(toolbarButton, 999)
+        stroke(toolbarButton, theme.Outline, 0.28, 1)
+        toolbarButtons[index] = toolbarButton
+    end
+
+    local avatarImage = create("ImageLabel", {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Size = UDim2.fromScale(1, 1),
+        Parent = toolbarButtons[1],
+    })
+    round(avatarImage, 999)
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.GothamMedium,
+        Position = UDim2.new(0, 0, 0, -1),
+        Size = UDim2.fromScale(1, 1),
+        Text = "===",
+        TextColor3 = theme.Text,
+        TextSize = 18,
+        Parent = toolbarButtons[2],
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.GothamMedium,
+        Size = UDim2.fromScale(1, 1),
+        Text = "[]",
+        TextColor3 = theme.Text,
+        TextSize = 15,
+        Parent = toolbarButtons[3],
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.GothamMedium,
+        Size = UDim2.fromScale(1, 1),
+        Text = "<>",
+        TextColor3 = theme.Text,
+        TextSize = 15,
+        Parent = toolbarButtons[4],
+    })
+
+    if LocalPlayer then
+        task.spawn(function()
+            local ok, image = pcall(function()
+                return Players:GetUserThumbnailAsync(
+                    LocalPlayer.UserId,
+                    Enum.ThumbnailType.AvatarBust,
+                    Enum.ThumbnailSize.Size100x100
+                )
+            end)
+
+            if ok and avatarImage.Parent then
+                avatarImage.Image = image
+            end
+        end)
+    end
+
+    local infoCard = create("Frame", {
+        AnchorPoint = Vector2.new(1, 0),
+        BackgroundColor3 = Color3.fromRGB(55, 71, 82),
+        BackgroundTransparency = 0.18,
+        BorderSizePixel = 0,
+        Position = UDim2.new(1, -16, 0, 62),
+        Size = UDim2.fromOffset(242, 126),
+        Parent = stage,
+    })
+    round(infoCard, 8)
+    stroke(infoCard, theme.Outline, 0.55, 1)
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0, 10, 0, 8),
+        Size = UDim2.new(0, 16, 0, 16),
+        Text = "X",
+        TextColor3 = theme.Text,
+        TextSize = 12,
+        Parent = infoCard,
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0, 14, 0, 26),
+        Size = UDim2.new(0.55, 0, 0, 14),
+        Text = "People",
+        TextColor3 = theme.Muted,
+        TextSize = 10,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = infoCard,
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0.66, 0, 0, 26),
+        Size = UDim2.new(0.28, 0, 0, 14),
+        Text = "Value",
+        TextColor3 = theme.Muted,
+        TextSize = 10,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        Parent = infoCard,
+    })
+
+    local peopleRow = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0, 14, 0, 52),
+        Size = UDim2.new(0.55, 0, 0, 18),
+        Text = LocalPlayer and LocalPlayer.Name or "Player",
+        TextColor3 = theme.Text,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = infoCard,
+    })
+
+    local keyHint = create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0.66, 0, 0, 52),
+        Size = UDim2.new(0.28, 0, 0, 18),
+        Text = toggleKey.Name,
+        TextColor3 = theme.Text,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        Parent = infoCard,
+    })
+
+    create("Frame", {
+        BackgroundColor3 = theme.Outline,
+        BackgroundTransparency = 0.2,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 78),
+        Size = UDim2.new(1, 0, 0, 1),
+        Parent = infoCard,
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0, 14, 0, 92),
+        Size = UDim2.new(0.55, 0, 0, 18),
+        Text = "Players",
+        TextColor3 = theme.Text,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = infoCard,
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0.66, 0, 0, 92),
+        Size = UDim2.new(0.28, 0, 0, 18),
+        Text = tostring(#Players:GetPlayers()),
+        TextColor3 = theme.Text,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        Parent = infoCard,
+    })
+
     local leftPanel = create("Frame", {
         BackgroundColor3 = theme.Panel,
         BackgroundTransparency = leftPanelTransparency,
         BorderSizePixel = 0,
-        Size = UDim2.new(leftWidth, 0, 1, 0),
+        Position = UDim2.new(0, sideMargin, 0, bodyTop),
+        Size = UDim2.new(0, leftPanelWidth, 1, -(bodyTop + bottomInset)),
         Parent = stage,
     })
-    round(leftPanel, 26)
-    stroke(leftPanel, theme.Outline, 0.92, 1)
+    round(leftPanel, 10)
+    stroke(leftPanel, theme.Outline, 0.2, 1)
 
     local centerPanel = create("Frame", {
         BackgroundColor3 = theme.Background,
         BackgroundTransparency = centerPanelTransparency,
         BorderSizePixel = 0,
-        Position = UDim2.new(leftWidth, gap, 0, 0),
-        Size = UDim2.new(1 - leftWidth - rightWidth, -(gap * 2), 1, 0),
+        Position = UDim2.new(0, sideMargin + leftPanelWidth + gap, 0, bodyTop),
+        Size = UDim2.new(1, -((sideMargin * 2) + leftPanelWidth + rightPanelWidth + (gap * 2)), 1, -(bodyTop + bottomInset)),
         Parent = stage,
     })
-    round(centerPanel, 28)
-    stroke(centerPanel, theme.Outline, 0.9, 1)
+    round(centerPanel, 10)
+    stroke(centerPanel, theme.Outline, 0.18, 1)
 
     local rightPanel = create("Frame", {
         AnchorPoint = Vector2.new(1, 0),
         BackgroundColor3 = theme.Panel,
         BackgroundTransparency = rightPanelTransparency,
         BorderSizePixel = 0,
-        Position = UDim2.new(1, 0, 0, 0),
-        Size = UDim2.new(rightWidth, 0, 1, 0),
+        Position = UDim2.new(1, -sideMargin, 0, bodyTop),
+        Size = UDim2.new(0, rightPanelWidth, 1, -(bodyTop + bottomInset)),
         Parent = stage,
     })
-    round(rightPanel, 26)
-    stroke(rightPanel, theme.Outline, 0.92, 1)
+    round(rightPanel, 10)
+    stroke(rightPanel, theme.Outline, 0.2, 1)
 
-    padding(leftPanel, 14, 14, 14, 14)
-    padding(centerPanel, 14, 14, 14, 14)
-    padding(rightPanel, 12, 12, 14, 12)
-
-    local leftHeader = create("Frame", {
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 78),
-        Parent = leftPanel,
-    })
-
-    create("TextLabel", {
-        BackgroundTransparency = 1,
-        Font = Enum.Font.GothamBold,
-        Position = UDim2.new(0, 0, 0, 4),
-        Size = UDim2.new(1, 0, 0, 24),
-        Text = title,
-        TextColor3 = theme.Text,
-        TextSize = 20,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = leftHeader,
-    })
-
-    create("TextLabel", {
-        BackgroundTransparency = 1,
-        Font = Enum.Font.Gotham,
-        Position = UDim2.new(0, 0, 0, 30),
-        Size = UDim2.new(1, 0, 0, 16),
-        Text = subtitle,
-        TextColor3 = theme.Muted,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = leftHeader,
-    })
-
-    local keyHint = create("TextLabel", {
-        BackgroundColor3 = theme.AccentSoft,
-        BackgroundTransparency = 0.52,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 1, -28),
-        Size = UDim2.fromOffset(78, 28),
-        Font = Enum.Font.GothamSemibold,
-        Text = toggleKey.Name .. " Toggle",
-        TextColor3 = theme.Text,
-        TextSize = 11,
-        Parent = leftHeader,
-    })
-    round(keyHint, 999)
-    stroke(keyHint, theme.Outline, 0.92, 1)
+    padding(leftPanel, 10, 10, 10, 10)
+    padding(centerPanel, 10, 10, 8, 8)
+    padding(rightPanel, 10, 10, 10, 10)
 
     local tabsWrap = create("ScrollingFrame", {
         Active = true,
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         CanvasSize = UDim2.new(),
-        Position = UDim2.new(0, 0, 0, 88),
         ScrollBarImageTransparency = 1,
         ScrollBarThickness = 0,
-        Size = UDim2.new(1, 0, 1, -(88 + footerHeight + 10)),
+        Size = UDim2.new(1, 0, 1, -(footerHeight > 0 and (footerHeight + 10) or 0)),
         Parent = leftPanel,
     })
 
@@ -415,93 +571,86 @@ function Library:CreateWindow(options)
         tabsWrap.CanvasSize = UDim2.new(0, 0, 0, tabsLayout.AbsoluteContentSize.Y + 8)
     end)
 
-    local profileCard = create("Frame", {
-        BackgroundColor3 = theme.PanelSoft,
-        BackgroundTransparency = 0.28,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 1, -footerHeight),
-        Size = UDim2.new(1, 0, 0, footerHeight),
-        Parent = leftPanel,
-    })
-    round(profileCard, 20)
-    stroke(profileCard, theme.Outline, 0.93, 1)
+    if showProfileCard then
+        local profileCard = create("Frame", {
+            BackgroundColor3 = theme.PanelSoft,
+            BackgroundTransparency = 0.08,
+            BorderSizePixel = 0,
+            Position = UDim2.new(0, 0, 1, -footerHeight),
+            Size = UDim2.new(1, 0, 0, footerHeight),
+            Parent = leftPanel,
+        })
+        round(profileCard, 10)
+        stroke(profileCard, theme.Outline, 0.25, 1)
 
-    local avatar = create("ImageLabel", {
-        BackgroundColor3 = theme.AccentSoft,
-        BackgroundTransparency = 0.25,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 10, 0.5, -20),
-        Size = UDim2.fromOffset(40, 40),
-        Parent = profileCard,
-    })
-    round(avatar, 999)
-    stroke(avatar, theme.Outline, 0.9, 1)
+        local footerAvatar = create("ImageLabel", {
+            BackgroundColor3 = theme.AccentSoft,
+            BackgroundTransparency = 0.15,
+            BorderSizePixel = 0,
+            Position = UDim2.new(0, 10, 0.5, -18),
+            Size = UDim2.fromOffset(36, 36),
+            Parent = profileCard,
+        })
+        round(footerAvatar, 999)
 
-    create("TextLabel", {
-        BackgroundTransparency = 1,
-        Font = Enum.Font.GothamSemibold,
-        Position = UDim2.new(0, 58, 0, 14),
-        Size = UDim2.new(1, -66, 0, 16),
-        Text = LocalPlayer and (LocalPlayer.DisplayName or LocalPlayer.Name) or "Player",
-        TextColor3 = theme.Text,
-        TextSize = 13,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = profileCard,
-    })
+        create("TextLabel", {
+            BackgroundTransparency = 1,
+            Font = Enum.Font.GothamSemibold,
+            Position = UDim2.new(0, 54, 0, 12),
+            Size = UDim2.new(1, -62, 0, 14),
+            Text = LocalPlayer and (LocalPlayer.DisplayName or LocalPlayer.Name) or "Player",
+            TextColor3 = theme.Text,
+            TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = profileCard,
+        })
 
-    create("TextLabel", {
-        BackgroundTransparency = 1,
-        Font = Enum.Font.Gotham,
-        Position = UDim2.new(0, 58, 0, 32),
-        Size = UDim2.new(1, -66, 0, 14),
-        Text = LocalPlayer and ("@" .. LocalPlayer.Name) or "@Player",
-        TextColor3 = theme.Muted,
-        TextSize = 11,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = profileCard,
-    })
+        create("TextLabel", {
+            BackgroundTransparency = 1,
+            Font = Enum.Font.Gotham,
+            Position = UDim2.new(0, 54, 0, 28),
+            Size = UDim2.new(1, -62, 0, 12),
+            Text = LocalPlayer and ("@" .. LocalPlayer.Name) or "@Player",
+            TextColor3 = theme.Muted,
+            TextSize = 10,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = profileCard,
+        })
 
-    if LocalPlayer then
-        task.spawn(function()
-            local ok, image = pcall(function()
-                return Players:GetUserThumbnailAsync(
-                    LocalPlayer.UserId,
-                    Enum.ThumbnailType.AvatarBust,
-                    Enum.ThumbnailSize.Size100x100
-                )
+        if avatarImage.Image ~= "" then
+            footerAvatar.Image = avatarImage.Image
+        elseif LocalPlayer then
+            task.spawn(function()
+                local ok, image = pcall(function()
+                    return Players:GetUserThumbnailAsync(
+                        LocalPlayer.UserId,
+                        Enum.ThumbnailType.AvatarBust,
+                        Enum.ThumbnailSize.Size100x100
+                    )
+                end)
+
+                if ok and footerAvatar.Parent then
+                    footerAvatar.Image = image
+                end
             end)
-
-            if ok and avatar.Parent then
-                avatar.Image = image
-            end
-        end)
+        end
     end
 
     local centerHeader = create("Frame", {
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 70),
+        Size = UDim2.new(1, 0, 0, 42),
         Parent = centerPanel,
     })
 
-    local centerBadge = create("Frame", {
-        BackgroundColor3 = theme.Accent,
-        BackgroundTransparency = 0.08,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 8),
-        Size = UDim2.fromOffset(4, 54),
-        Parent = centerHeader,
-    })
-    round(centerBadge, 999)
-
     local activeTitle = create("TextLabel", {
         BackgroundTransparency = 1,
-        Font = Enum.Font.GothamBold,
-        Position = UDim2.new(0, 16, 0, 10),
-        Size = UDim2.new(1, -16, 0, 26),
-        Text = "No Tab",
+        Font = Enum.Font.GothamSemibold,
+        Position = UDim2.new(0, 2, 0, 2),
+        Size = UDim2.new(1, -4, 0, 18),
+        Text = title,
         TextColor3 = theme.Text,
-        TextSize = 22,
+        TextSize = 15,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = centerHeader,
     })
@@ -509,11 +658,11 @@ function Library:CreateWindow(options)
     local activeSubtitle = create("TextLabel", {
         BackgroundTransparency = 1,
         Font = Enum.Font.Gotham,
-        Position = UDim2.new(0, 16, 0, 38),
-        Size = UDim2.new(1, -16, 0, 18),
-        Text = "Select a tab on the left",
+        Position = UDim2.new(0, 2, 0, 20),
+        Size = UDim2.new(1, -4, 0, 14),
+        Text = subtitle,
         TextColor3 = theme.Muted,
-        TextSize = 12,
+        TextSize = 10,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = centerHeader,
     })
@@ -521,56 +670,74 @@ function Library:CreateWindow(options)
     local centerBody = create("Frame", {
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 78),
-        Size = UDim2.new(1, 0, 1, -78),
+        Position = UDim2.new(0, 0, 0, 42),
+        Size = UDim2.new(1, 0, 1, -42),
         Parent = centerPanel,
-    })
-
-    local rightHeader = create("Frame", {
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 70),
-        Parent = rightPanel,
-    })
-
-    create("TextLabel", {
-        BackgroundTransparency = 1,
-        Font = Enum.Font.GothamSemibold,
-        Position = UDim2.new(0, 2, 0, 10),
-        Size = UDim2.new(1, -4, 0, 20),
-        Text = "Side Panel",
-        TextColor3 = theme.Text,
-        TextSize = 16,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = rightHeader,
-    })
-
-    create("TextLabel", {
-        BackgroundTransparency = 1,
-        Font = Enum.Font.Gotham,
-        Position = UDim2.new(0, 2, 0, 34),
-        Size = UDim2.new(1, -4, 0, 16),
-        Text = "Separate widgets for the active tab",
-        TextColor3 = theme.Muted,
-        TextSize = 11,
-        TextWrapped = true,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = rightHeader,
     })
 
     local rightBody = create("Frame", {
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 78),
-        Size = UDim2.new(1, 0, 1, -78),
+        Size = UDim2.new(1, 0, 1, 0),
         Parent = rightPanel,
+    })
+
+    local searchWrap = create("Frame", {
+        AnchorPoint = Vector2.new(0.5, 1),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, 0, 1, -18),
+        Size = UDim2.fromOffset(520, 58),
+        Parent = stage,
+    })
+
+    local searchFrame = create("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0),
+        BackgroundColor3 = theme.Panel,
+        BackgroundTransparency = 0.03,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, 0, 0, 0),
+        Size = UDim2.fromOffset(480, 42),
+        Parent = searchWrap,
+    })
+    round(searchFrame, 8)
+    stroke(searchFrame, theme.Outline, 0.22, 1)
+
+    create("TextBox", {
+        BackgroundTransparency = 1,
+        ClearTextOnFocus = false,
+        Font = Enum.Font.Gotham,
+        PlaceholderText = "Search modules",
+        PlaceholderColor3 = theme.Muted,
+        Position = UDim2.new(0, 12, 0, 0),
+        Size = UDim2.new(1, -24, 1, 0),
+        Text = "",
+        TextColor3 = theme.Text,
+        TextSize = 13,
+        Parent = searchFrame,
+    })
+
+    create("TextLabel", {
+        AnchorPoint = Vector2.new(0.5, 1),
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0.5, 0, 1, 0),
+        Size = UDim2.new(1, 0, 0, 12),
+        Text = "sorrelhub.xyz",
+        TextColor3 = theme.Muted,
+        TextSize = 9,
+        Parent = searchWrap,
     })
 
     local window = setmetatable({
         Library = self,
         ScreenGui = screenGui,
         Overlay = overlay,
+        Dimmer = dimmer,
         Stage = stage,
+        Toolbar = toolbar,
+        InfoCard = infoCard,
+        SearchWrap = searchWrap,
         LeftPanel = leftPanel,
         CenterPanel = centerPanel,
         RightPanel = rightPanel,
@@ -579,10 +746,17 @@ function Library:CreateWindow(options)
         RightBody = rightBody,
         ActiveTitle = activeTitle,
         ActiveSubtitle = activeSubtitle,
+        PeopleRow = peopleRow,
         KeyHint = keyHint,
-        LeftWidth = leftWidth,
-        RightWidth = rightWidth,
+        LeftWidth = leftPanelWidth,
+        RightWidth = rightPanelWidth,
         PanelGap = gap,
+        LeftPanelWidthPx = leftPanelWidth,
+        RightPanelWidthPx = rightPanelWidth,
+        PanelGapPx = gap,
+        BodyLeftOffset = sideMargin,
+        BodyTopOffset = bodyTop,
+        BodyBottomInset = bottomInset,
         OverlayBaseTransparency = overlayTransparency,
         LeftPanelBaseTransparency = leftPanelTransparency,
         CenterPanelBaseTransparency = centerPanelTransparency,
@@ -600,14 +774,14 @@ function Library:CreateWindow(options)
     window:SetToggleKey(toggleKey)
     window:SetRightPanelVisible(rightPanelEnabled, true)
 
-    stage.Size = UDim2.new(size.X.Scale, math.max(-40, size.X.Offset - 60), size.Y.Scale, math.max(-40, size.Y.Offset - 40))
+    stage.Size = UDim2.new(size.X.Scale, math.max(-20, size.X.Offset), size.Y.Scale, math.max(-20, size.Y.Offset))
     leftPanel.BackgroundTransparency = 1
     centerPanel.BackgroundTransparency = 1
     rightPanel.BackgroundTransparency = 1
-    overlay.BackgroundTransparency = 1
+    dimmer.BackgroundTransparency = 1
 
-    tween(overlay, 0.18, { BackgroundTransparency = overlayTransparency })
-    tween(stage, 0.28, { Size = size }, Enum.EasingStyle.Quint)
+    tween(dimmer, 0.18, { BackgroundTransparency = overlayTransparency })
+    tween(stage, 0.2, { Size = size }, Enum.EasingStyle.Quint)
     tween(leftPanel, 0.22, { BackgroundTransparency = leftPanelTransparency })
     tween(centerPanel, 0.22, { BackgroundTransparency = centerPanelTransparency })
     if rightPanelEnabled then
@@ -624,7 +798,7 @@ function WindowMethods:SetToggleKey(keyCode)
 
     self.ToggleKey = keyCode
     if self.KeyHint then
-        self.KeyHint.Text = keyCode.Name .. " Toggle"
+        self.KeyHint.Text = keyCode.Name
     end
 
     if self._keyConnection then
@@ -641,12 +815,17 @@ function WindowMethods:SetToggleKey(keyCode)
         if self.Visible then
             self.Overlay.Visible = true
             self.Stage.Visible = true
-            self.Overlay.BackgroundTransparency = 1
+            if self.Dimmer then
+                self.Dimmer.BackgroundTransparency = 1
+            end
             self.Stage.Position = UDim2.fromScale(0.5, 0.52)
-            tween(self.Overlay, 0.15, { BackgroundTransparency = self.OverlayBaseTransparency or 0.45 })
+            if self.Dimmer then
+                tween(self.Dimmer, 0.15, { BackgroundTransparency = self.OverlayBaseTransparency or 0.82 })
+            end
             tween(self.Stage, 0.16, { Position = UDim2.fromScale(0.5, 0.5) })
         else
-            local fade = tween(self.Overlay, 0.14, { BackgroundTransparency = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+            local fadeTarget = self.Dimmer or self.Overlay
+            local fade = tween(fadeTarget, 0.14, { BackgroundTransparency = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
             tween(self.Stage, 0.14, { Position = UDim2.fromScale(0.5, 0.52) }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
             fade.Completed:Connect(function()
                 if not self.Visible then
@@ -661,16 +840,26 @@ end
 
 function WindowMethods:SetRightPanelVisible(visible, instant)
     local shouldShow = visible ~= false
-    local centerPosition = UDim2.new(self.LeftWidth, self.PanelGap, 0, 0)
+    local centerPosition = UDim2.new(0, self.BodyLeftOffset + self.LeftPanelWidthPx + self.PanelGapPx, 0, self.BodyTopOffset)
     local centerSize
 
     self.RightPanelEnabled = shouldShow
 
     if shouldShow then
-        centerSize = UDim2.new(1 - self.LeftWidth - self.RightWidth, -(self.PanelGap * 2), 1, 0)
+        centerSize = UDim2.new(
+            1,
+            -((self.BodyLeftOffset * 2) + self.LeftPanelWidthPx + self.RightPanelWidthPx + (self.PanelGapPx * 2)),
+            1,
+            -(self.BodyTopOffset + self.BodyBottomInset)
+        )
         self.RightPanel.Visible = true
     else
-        centerSize = UDim2.new(1 - self.LeftWidth, -self.PanelGap, 1, 0)
+        centerSize = UDim2.new(
+            1,
+            -((self.BodyLeftOffset * 2) + self.LeftPanelWidthPx + self.PanelGapPx),
+            1,
+            -(self.BodyTopOffset + self.BodyBottomInset)
+        )
     end
 
     if instant then
@@ -724,49 +913,49 @@ end
 function WindowMethods:Tab(options)
     options = options or {}
     local theme = self.Library.Theme
+    local tabTitle = options.Title or options.Name or "Tab"
+    local tabIcon = options.Icon or string.sub(tabTitle, 1, 1)
 
     local button = create("TextButton", {
         AutoButtonColor = false,
         BackgroundColor3 = theme.PanelSoft,
-        BackgroundTransparency = 0.22,
+        BackgroundTransparency = 0.05,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 58),
+        Size = UDim2.new(1, 0, 0, 40),
         Text = "",
         Parent = self.TabsContainer,
     })
-    round(button, 18)
-    local buttonStroke = stroke(button, theme.Outline, 0.93, 1)
+    round(button, 8)
+    local buttonStroke = stroke(button, theme.Outline, 0.22, 1)
 
     local accent = create("Frame", {
-        BackgroundColor3 = theme.Accent,
-        BackgroundTransparency = 1,
+        BackgroundColor3 = theme.AccentDark,
+        BackgroundTransparency = 0.02,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 10, 0.5, -14),
-        Size = UDim2.fromOffset(4, 28),
+        Position = UDim2.new(0, 2, 0.5, -12),
+        Size = UDim2.fromOffset(24, 24),
         Parent = button,
     })
-    round(accent, 999)
+    round(accent, 6)
 
     create("TextLabel", {
         BackgroundTransparency = 1,
         Font = Enum.Font.GothamSemibold,
-        Position = UDim2.new(0, 22, 0, 10),
-        Size = UDim2.new(1, -30, 0, 18),
-        Text = options.Title or options.Name or "Tab",
-        TextColor3 = theme.Text,
-        TextSize = 15,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = button,
+        Size = UDim2.fromScale(1, 1),
+        Text = string.upper(string.sub(tabIcon, 1, 1)),
+        TextColor3 = theme.Accent,
+        TextSize = 12,
+        Parent = accent,
     })
 
     create("TextLabel", {
         BackgroundTransparency = 1,
-        Font = Enum.Font.Gotham,
-        Position = UDim2.new(0, 22, 0, 30),
-        Size = UDim2.new(1, -30, 0, 14),
-        Text = options.Description or options.Desc or "Open this tab",
-        TextColor3 = theme.Muted,
-        TextSize = 11,
+        Font = Enum.Font.GothamSemibold,
+        Position = UDim2.new(0, 34, 0, 0),
+        Size = UDim2.new(1, -38, 1, 0),
+        Text = tabTitle,
+        TextColor3 = theme.Text,
+        TextSize = 13,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = button,
     })
@@ -783,7 +972,7 @@ function WindowMethods:Tab(options)
         CenterHolder = centerHolder,
         RightPage = rightPage,
         RightHolder = rightHolder,
-        Title = options.Title or options.Name or "Tab",
+        Title = tabTitle,
         Description = options.Description or options.Desc or "Open this tab",
     }, {
         __index = TabMethods,
@@ -791,13 +980,13 @@ function WindowMethods:Tab(options)
 
     button.MouseEnter:Connect(function()
         if self.SelectedTab ~= tab then
-            tween(button, 0.12, { BackgroundTransparency = 0.14 })
+            tween(button, 0.12, { BackgroundTransparency = 0 })
         end
     end)
 
     button.MouseLeave:Connect(function()
         if self.SelectedTab ~= tab then
-            tween(button, 0.12, { BackgroundTransparency = 0.22 })
+            tween(button, 0.12, { BackgroundTransparency = 0.05 })
         end
     end)
 
@@ -829,15 +1018,16 @@ function WindowMethods:SelectTab(indexOrTab)
         entry.RightPage.Visible = active and self.RightPanelEnabled
 
         tween(entry.Button, 0.18, {
-            BackgroundTransparency = active and 0.08 or 0.22,
+            BackgroundTransparency = active and 0 or 0.05,
             BackgroundColor3 = active and self.Library.Theme.AccentSoft or self.Library.Theme.PanelSoft,
         })
         tween(entry.ButtonStroke, 0.18, {
-            Transparency = active and 0.86 or 0.93,
-            Color = active and self.Library.Theme.Accent or self.Library.Theme.Outline,
+            Transparency = active and 0.08 or 0.22,
+            Color = active and self.Library.Theme.AccentDark or self.Library.Theme.Outline,
         })
         tween(entry.Accent, 0.18, {
-            BackgroundTransparency = active and 0.05 or 1,
+            BackgroundTransparency = active and 0 or 0.02,
+            BackgroundColor3 = active and self.Library.Theme.AccentDark or self.Library.Theme.PanelSoft,
         })
     end
 
@@ -880,39 +1070,39 @@ local function addButton(tab, options, side)
     options = options or {}
     local card = createCard(tab, options, computeCardHeight(options.Desc or options.Description, 72), side)
     local theme = tab.Window.Library.Theme
-    reserveCardTextSpace(card, 132)
+    reserveCardTextSpace(card, 116)
 
     local button = create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
         AutoButtonColor = false,
-        BackgroundColor3 = theme.AccentDark,
+        BackgroundColor3 = theme.PanelSoft,
         BorderSizePixel = 0,
         Position = UDim2.new(1, -14, 0.5, 0),
-        Size = UDim2.fromOffset(104, 36),
+        Size = UDim2.fromOffset(92, 34),
         Font = Enum.Font.GothamSemibold,
         Text = options.ButtonText or options.ActionText or "Run",
-        TextColor3 = theme.Text,
-        TextSize = 13,
+        TextColor3 = theme.Accent,
+        TextSize = 12,
         Parent = card.Card,
     })
-    round(button, 14)
-    stroke(button, theme.Outline, 0.9, 1)
+    round(button, 999)
+    stroke(button, theme.Outline, 0.18, 1)
 
     create("UIGradient", {
         Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, theme.Accent),
-            ColorSequenceKeypoint.new(1, theme.AccentDark),
+            ColorSequenceKeypoint.new(0, theme.PanelSoft),
+            ColorSequenceKeypoint.new(1, theme.PanelSoft),
         }),
         Rotation = 20,
         Parent = button,
     })
 
     button.MouseEnter:Connect(function()
-        tween(button, 0.12, { Size = UDim2.fromOffset(108, 38) })
+        tween(button, 0.12, { Size = UDim2.fromOffset(96, 34) })
     end)
 
     button.MouseLeave:Connect(function()
-        tween(button, 0.12, { Size = UDim2.fromOffset(104, 36) })
+        tween(button, 0.12, { Size = UDim2.fromOffset(92, 34) })
     end)
 
     button.MouseButton1Click:Connect(function()
@@ -1112,7 +1302,7 @@ function TabMethods:Bind(options)
     options = options or {}
     local theme = self.Window.Library.Theme
     local card = createCard(self, options, computeCardHeight(options.Desc or options.Description, 72), "right")
-    reserveCardTextSpace(card, 120)
+    reserveCardTextSpace(card, 110)
     local currentKey = options.Key or options.Default or Enum.KeyCode.K
     local waiting = false
     local connection = nil
@@ -1123,15 +1313,15 @@ function TabMethods:Bind(options)
         BackgroundColor3 = theme.PanelSoft,
         BorderSizePixel = 0,
         Position = UDim2.new(1, -14, 0.5, 0),
-        Size = UDim2.fromOffset(92, 34),
+        Size = UDim2.fromOffset(82, 32),
         Font = Enum.Font.GothamSemibold,
         Text = currentKey.Name,
-        TextColor3 = theme.Text,
-        TextSize = 13,
+        TextColor3 = theme.Accent,
+        TextSize = 12,
         Parent = card.Card,
     })
-    round(button, 14)
-    stroke(button, theme.Outline, 0.92, 1)
+    round(button, 999)
+    stroke(button, theme.Outline, 0.18, 1)
 
     local function setKey(key)
         currentKey = key
