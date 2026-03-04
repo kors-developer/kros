@@ -164,7 +164,7 @@ local function createCard(tab, options, height, side)
 
     local card = create("Frame", {
         BackgroundColor3 = theme.PanelRaised,
-        BackgroundTransparency = 0.06,
+        BackgroundTransparency = 0.16,
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, height),
         Parent = holder,
@@ -183,7 +183,7 @@ local function createCard(tab, options, height, side)
 
     local shine = create("Frame", {
         BackgroundColor3 = theme.Outline,
-        BackgroundTransparency = 0.975,
+        BackgroundTransparency = 0.985,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 1, 0, 1),
         Size = UDim2.new(1, -2, 0, 24),
@@ -242,6 +242,22 @@ function Library:CreateWindow(options)
     local leftWidth = options.LeftWidth or 0.19
     local rightWidth = options.RightWidth or 0.21
     local gap = options.Gap or 16
+    local footerHeight = options.FooterHeight or 68
+    local overlayTransparency = options.OverlayTransparency or 0.45
+    local leftPanelTransparency = options.LeftPanelTransparency or 0.18
+    local centerPanelTransparency = options.CenterPanelTransparency or 0.12
+    local rightPanelTransparency = options.RightPanelTransparency or 0.18
+
+    local rightPanelEnabled = options.RightPanelEnabled
+    if rightPanelEnabled == nil then
+        rightPanelEnabled = options.ShowRightPanel
+    end
+    if rightPanelEnabled == nil then
+        rightPanelEnabled = options.RightPanel
+    end
+    if rightPanelEnabled == nil then
+        rightPanelEnabled = true
+    end
 
     local parent = getGuiParent()
     local oldGui = parent and parent:FindFirstChild("NeitronUI_Main")
@@ -259,7 +275,7 @@ function Library:CreateWindow(options)
 
     local overlay = create("Frame", {
         BackgroundColor3 = Color3.new(0, 0, 0),
-        BackgroundTransparency = 0.3,
+        BackgroundTransparency = overlayTransparency,
         BorderSizePixel = 0,
         Size = UDim2.fromScale(1, 1),
         Parent = screenGui,
@@ -282,7 +298,7 @@ function Library:CreateWindow(options)
 
     local leftPanel = create("Frame", {
         BackgroundColor3 = theme.Panel,
-        BackgroundTransparency = 0.04,
+        BackgroundTransparency = leftPanelTransparency,
         BorderSizePixel = 0,
         Size = UDim2.new(leftWidth, 0, 1, 0),
         Parent = stage,
@@ -292,7 +308,7 @@ function Library:CreateWindow(options)
 
     local centerPanel = create("Frame", {
         BackgroundColor3 = theme.Background,
-        BackgroundTransparency = 0.02,
+        BackgroundTransparency = centerPanelTransparency,
         BorderSizePixel = 0,
         Position = UDim2.new(leftWidth, gap, 0, 0),
         Size = UDim2.new(1 - leftWidth - rightWidth, -(gap * 2), 1, 0),
@@ -304,7 +320,7 @@ function Library:CreateWindow(options)
     local rightPanel = create("Frame", {
         AnchorPoint = Vector2.new(1, 0),
         BackgroundColor3 = theme.Panel,
-        BackgroundTransparency = 0.04,
+        BackgroundTransparency = rightPanelTransparency,
         BorderSizePixel = 0,
         Position = UDim2.new(1, 0, 0, 0),
         Size = UDim2.new(rightWidth, 0, 1, 0),
@@ -350,7 +366,7 @@ function Library:CreateWindow(options)
 
     local keyHint = create("TextLabel", {
         BackgroundColor3 = theme.AccentSoft,
-        BackgroundTransparency = 0.35,
+        BackgroundTransparency = 0.52,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 1, -28),
         Size = UDim2.fromOffset(78, 28),
@@ -371,7 +387,7 @@ function Library:CreateWindow(options)
         Position = UDim2.new(0, 0, 0, 88),
         ScrollBarImageTransparency = 1,
         ScrollBarThickness = 0,
-        Size = UDim2.new(1, 0, 1, -88),
+        Size = UDim2.new(1, 0, 1, -(88 + footerHeight + 10)),
         Parent = leftPanel,
     })
 
@@ -384,6 +400,68 @@ function Library:CreateWindow(options)
     tabsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         tabsWrap.CanvasSize = UDim2.new(0, 0, 0, tabsLayout.AbsoluteContentSize.Y + 8)
     end)
+
+    local profileCard = create("Frame", {
+        BackgroundColor3 = theme.PanelSoft,
+        BackgroundTransparency = 0.28,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 1, -footerHeight),
+        Size = UDim2.new(1, 0, 0, footerHeight),
+        Parent = leftPanel,
+    })
+    round(profileCard, 20)
+    stroke(profileCard, theme.Outline, 0.93, 1)
+
+    local avatar = create("ImageLabel", {
+        BackgroundColor3 = theme.AccentSoft,
+        BackgroundTransparency = 0.25,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 10, 0.5, -20),
+        Size = UDim2.fromOffset(40, 40),
+        Parent = profileCard,
+    })
+    round(avatar, 999)
+    stroke(avatar, theme.Outline, 0.9, 1)
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.GothamSemibold,
+        Position = UDim2.new(0, 58, 0, 14),
+        Size = UDim2.new(1, -66, 0, 16),
+        Text = LocalPlayer and (LocalPlayer.DisplayName or LocalPlayer.Name) or "Player",
+        TextColor3 = theme.Text,
+        TextSize = 13,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = profileCard,
+    })
+
+    create("TextLabel", {
+        BackgroundTransparency = 1,
+        Font = Enum.Font.Gotham,
+        Position = UDim2.new(0, 58, 0, 32),
+        Size = UDim2.new(1, -66, 0, 14),
+        Text = LocalPlayer and ("@" .. LocalPlayer.Name) or "@Player",
+        TextColor3 = theme.Muted,
+        TextSize = 11,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = profileCard,
+    })
+
+    if LocalPlayer then
+        task.spawn(function()
+            local ok, image = pcall(function()
+                return Players:GetUserThumbnailAsync(
+                    LocalPlayer.UserId,
+                    Enum.ThumbnailType.AvatarBust,
+                    Enum.ThumbnailSize.Size100x100
+                )
+            end)
+
+            if ok and avatar.Parent then
+                avatar.Image = image
+            end
+        end)
+    end
 
     local centerHeader = create("Frame", {
         BackgroundTransparency = 1,
@@ -488,6 +566,14 @@ function Library:CreateWindow(options)
         ActiveTitle = activeTitle,
         ActiveSubtitle = activeSubtitle,
         KeyHint = keyHint,
+        LeftWidth = leftWidth,
+        RightWidth = rightWidth,
+        PanelGap = gap,
+        OverlayBaseTransparency = overlayTransparency,
+        LeftPanelBaseTransparency = leftPanelTransparency,
+        CenterPanelBaseTransparency = centerPanelTransparency,
+        RightPanelBaseTransparency = rightPanelTransparency,
+        RightPanelEnabled = rightPanelEnabled,
         Tabs = {},
         SelectedTab = nil,
         ToggleKey = toggleKey,
@@ -498,6 +584,7 @@ function Library:CreateWindow(options)
     })
 
     window:SetToggleKey(toggleKey)
+    window:SetRightPanelVisible(rightPanelEnabled, true)
 
     stage.Size = UDim2.new(size.X.Scale, math.max(-40, size.X.Offset - 60), size.Y.Scale, math.max(-40, size.Y.Offset - 40))
     leftPanel.BackgroundTransparency = 1
@@ -505,11 +592,13 @@ function Library:CreateWindow(options)
     rightPanel.BackgroundTransparency = 1
     overlay.BackgroundTransparency = 1
 
-    tween(overlay, 0.18, { BackgroundTransparency = 0.3 })
+    tween(overlay, 0.18, { BackgroundTransparency = overlayTransparency })
     tween(stage, 0.28, { Size = size }, Enum.EasingStyle.Quint)
-    tween(leftPanel, 0.22, { BackgroundTransparency = 0.04 })
-    tween(centerPanel, 0.22, { BackgroundTransparency = 0.02 })
-    tween(rightPanel, 0.22, { BackgroundTransparency = 0.04 })
+    tween(leftPanel, 0.22, { BackgroundTransparency = leftPanelTransparency })
+    tween(centerPanel, 0.22, { BackgroundTransparency = centerPanelTransparency })
+    if rightPanelEnabled then
+        tween(rightPanel, 0.22, { BackgroundTransparency = rightPanelTransparency })
+    end
 
     return window
 end
@@ -540,7 +629,7 @@ function WindowMethods:SetToggleKey(keyCode)
             self.Stage.Visible = true
             self.Overlay.BackgroundTransparency = 1
             self.Stage.Position = UDim2.fromScale(0.5, 0.52)
-            tween(self.Overlay, 0.15, { BackgroundTransparency = 0.3 })
+            tween(self.Overlay, 0.15, { BackgroundTransparency = self.OverlayBaseTransparency or 0.45 })
             tween(self.Stage, 0.16, { Position = UDim2.fromScale(0.5, 0.5) })
         else
             local fade = tween(self.Overlay, 0.14, { BackgroundTransparency = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
@@ -555,6 +644,57 @@ function WindowMethods:SetToggleKey(keyCode)
         end
     end)
 end
+
+function WindowMethods:SetRightPanelVisible(visible, instant)
+    local shouldShow = visible ~= false
+    local centerPosition = UDim2.new(self.LeftWidth, self.PanelGap, 0, 0)
+    local centerSize
+
+    self.RightPanelEnabled = shouldShow
+
+    if shouldShow then
+        centerSize = UDim2.new(1 - self.LeftWidth - self.RightWidth, -(self.PanelGap * 2), 1, 0)
+        self.RightPanel.Visible = true
+    else
+        centerSize = UDim2.new(1 - self.LeftWidth, -self.PanelGap, 1, 0)
+    end
+
+    if instant then
+        self.CenterPanel.Position = centerPosition
+        self.CenterPanel.Size = centerSize
+        self.RightPanel.BackgroundTransparency = shouldShow and self.RightPanelBaseTransparency or 1
+        self.RightPanel.Visible = shouldShow
+    else
+        tween(self.CenterPanel, 0.18, {
+            Position = centerPosition,
+            Size = centerSize,
+        })
+
+        if shouldShow then
+            self.RightPanel.Visible = true
+            self.RightPanel.BackgroundTransparency = 1
+            tween(self.RightPanel, 0.18, {
+                BackgroundTransparency = self.RightPanelBaseTransparency,
+            })
+        else
+            local hide = tween(self.RightPanel, 0.16, {
+                BackgroundTransparency = 1,
+            }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+            hide.Completed:Connect(function()
+                if not self.RightPanelEnabled then
+                    self.RightPanel.Visible = false
+                end
+            end)
+        end
+    end
+
+    for _, tab in ipairs(self.Tabs) do
+        tab.RightPage.Visible = shouldShow and tab == self.SelectedTab
+    end
+end
+
+WindowMethods.SetSidePanelVisible = WindowMethods.SetRightPanelVisible
 
 function WindowMethods:Destroy()
     if self._keyConnection then
@@ -574,7 +714,7 @@ function WindowMethods:Tab(options)
     local button = create("TextButton", {
         AutoButtonColor = false,
         BackgroundColor3 = theme.PanelSoft,
-        BackgroundTransparency = 0.1,
+        BackgroundTransparency = 0.22,
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, 58),
         Text = "",
@@ -637,13 +777,13 @@ function WindowMethods:Tab(options)
 
     button.MouseEnter:Connect(function()
         if self.SelectedTab ~= tab then
-            tween(button, 0.12, { BackgroundTransparency = 0.04 })
+            tween(button, 0.12, { BackgroundTransparency = 0.14 })
         end
     end)
 
     button.MouseLeave:Connect(function()
         if self.SelectedTab ~= tab then
-            tween(button, 0.12, { BackgroundTransparency = 0.1 })
+            tween(button, 0.12, { BackgroundTransparency = 0.22 })
         end
     end)
 
@@ -672,10 +812,10 @@ function WindowMethods:SelectTab(indexOrTab)
     for _, entry in ipairs(self.Tabs) do
         local active = entry == tab
         entry.CenterPage.Visible = active
-        entry.RightPage.Visible = active
+        entry.RightPage.Visible = active and self.RightPanelEnabled
 
         tween(entry.Button, 0.18, {
-            BackgroundTransparency = active and 0 or 0.1,
+            BackgroundTransparency = active and 0.08 or 0.22,
             BackgroundColor3 = active and self.Library.Theme.AccentSoft or self.Library.Theme.PanelSoft,
         })
         tween(entry.ButtonStroke, 0.18, {
