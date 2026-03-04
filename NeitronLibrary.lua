@@ -229,6 +229,20 @@ local function createCard(tab, options, height, side)
     }
 end
 
+local function reserveCardTextSpace(cardData, rightInset)
+    if not cardData then
+        return
+    end
+
+    if cardData.Title then
+        cardData.Title.Size = UDim2.new(1, -(rightInset + 14), 0, 18)
+    end
+
+    if cardData.Description then
+        cardData.Description.Size = UDim2.new(1, -(rightInset + 14), 0, 34)
+    end
+end
+
 function Library:CreateWindow(options)
     options = options or {}
 
@@ -866,6 +880,7 @@ local function addButton(tab, options, side)
     options = options or {}
     local card = createCard(tab, options, computeCardHeight(options.Desc or options.Description, 72), side)
     local theme = tab.Window.Library.Theme
+    reserveCardTextSpace(card, 132)
 
     local button = create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
@@ -925,6 +940,7 @@ local function addToggle(tab, options, side)
     local theme = tab.Window.Library.Theme
     local state = options.Value == true or options.Default == true or options.CurrentValue == true
     local card = createCard(tab, options, computeCardHeight(options.Desc or options.Description, 72), side)
+    reserveCardTextSpace(card, 86)
 
     local toggle = create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
@@ -991,6 +1007,7 @@ local function addSlider(tab, options, side)
     local dragging = false
 
     local card = createCard(tab, options, computeCardHeight(options.Desc or options.Description, 100), side)
+    reserveCardTextSpace(card, 104)
 
     local valueLabel = create("TextLabel", {
         AnchorPoint = Vector2.new(1, 0),
@@ -1095,6 +1112,7 @@ function TabMethods:Bind(options)
     options = options or {}
     local theme = self.Window.Library.Theme
     local card = createCard(self, options, computeCardHeight(options.Desc or options.Description, 72), "right")
+    reserveCardTextSpace(card, 120)
     local currentKey = options.Key or options.Default or Enum.KeyCode.K
     local waiting = false
     local connection = nil
